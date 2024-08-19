@@ -14,7 +14,7 @@ def version():
 
 help = "https://jakejk.io/modelChecker"
 
-description = " Sanity checking tool for polygon models in Maya"
+description = "Sanity checking tool for polygon models in Maya"
 
 authors = ["Jakob Kousholt", "Niels Peter Kaagaard "]
 
