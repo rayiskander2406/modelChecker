@@ -2,6 +2,7 @@
 from maya import cmds
 from modelChecker import maya_utility
 from PySide6 import QtWidgets, QtCore
+from modelChecker.constants import DataType
 
 import maya.api.OpenMaya as om
 
@@ -23,17 +24,18 @@ class Runner(QtCore.QObject):
         self.usd_nodes = []
         self.cached_data = {}
     
-    def _setup_context(self):
+    def _setup_context(self, data_type):
         nodes, usd_nodes = [], []
         selection = cmds.ls(selection=True, ufe=True, uuid=True)
         all_nodes = selection if selection else maya_utility.get_all_nodes()
         self.current_context = "selection" if selection else "all"
         self.contexts[self.current_context] = {}
         for node in all_nodes:
-            if node[0] == '|':
+            if node[0] == '|' and data_type != DataType.MAYA:
                 usd_nodes.append(node)
             else:
-                nodes.append(node)
+                if data_type != DataType.USD:
+                    nodes.append(node)
         self.nodes, self.usd_nodes = nodes, usd_nodes
         
     
@@ -41,9 +43,9 @@ class Runner(QtCore.QObject):
         if self.current_check is not None:
             self.interrupt = True
     
-    def run(self, check_widgets, refresh_context: bool = True):
+    def run(self, check_widgets, data_type: DataType, refresh_context: bool = True):
         if refresh_context or not self.contexts[self.current_context]:
-            self._setup_context()
+            self._setup_context(data_type)
         
         context = self.get_context()
         error_object = self.contexts[context]
@@ -79,8 +81,9 @@ class Runner(QtCore.QObject):
     def reset_contexts(self):
         self.nodes = []
         self.usd_nodes = []
-        self.contexts = {}
+        self.contexts = {"all": {}, "selection": {}}
         self.current_context = "all"
+        self.cached_data = {}
         self.result_object = {}
     
     def get_current_context(self):
@@ -118,7 +121,6 @@ class Runner(QtCore.QObject):
         if "mesh_shapes" in self.cached_data:
             return self.cached_data["mesh_shapes"]
         mesh_shapes = []
-        
         node_names = [ maya_utility.get_name_from_uuid(node) for node in self.nodes ]
         for node in node_names:
             shapes = cmds.listRelatives(node, shapes=True, fullPath=True, typ="mesh")

@@ -1,14 +1,13 @@
 from collections import defaultdict
 from modelChecker import maya_utility
 
-from maya import cmds
-
 from modelChecker.constants import NodeType
 from modelChecker.validation_check_base import ValidationCheckBase
 
 class DuplicatedNamesCheck(ValidationCheckBase):
     name = "duplicated_names"
     label = "Duplicated Names"
+    category = "Naming"
     node_type = NodeType.NODE
     
     def __init__(self):
@@ -22,7 +21,7 @@ class DuplicatedNamesCheck(ValidationCheckBase):
             nodes_by_short_name[name].append(uuid)
             
         invalid = []
-        for short_name, uuids in nodes_by_short_name.items():
+        for uuids in nodes_by_short_name.values():
             if len(uuids) > 1:
                 invalid.extend(uuids)
         return invalid

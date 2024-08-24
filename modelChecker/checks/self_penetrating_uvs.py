@@ -1,8 +1,8 @@
 from collections import defaultdict
-from modelChecker import maya_utility
 
 from maya import cmds
 
+from modelChecker import maya_utility
 from modelChecker.constants import NodeType
 from modelChecker.validation_check_base import ValidationCheckBase
 
@@ -21,7 +21,7 @@ class SelfPenetratingUVsCheck(ValidationCheckBase):
             overlapping = cmds.polyUVOverlap(f"{mesh}.f[*]", overlappingComponents=True)
             if overlapping:
                 uuid = maya_utility.get_uuid_from_shape(mesh)
-                formatted = [ overlap.split("{}.f[".format(mesh))[1][:-1] for overlap in overlapping ]
+                formatted = [ overlap.split(".f[")[1][:-1] for overlap in overlapping ]
                 self_penetrating_uvs[uuid].extend(formatted)
         return self_penetrating_uvs
                 

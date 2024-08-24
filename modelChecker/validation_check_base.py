@@ -12,10 +12,13 @@ class ValidationCheckBase(ABC):
     description = "Common description"
     node_type = NodeType.NODE
     
-    @abstractmethod
-    def run(self, nodes):
+    def run(self, runner):
         """Implemeneted run function."""
-        pass
+        return []
+    
+    def usd_run(self, runner):
+        return []
+        
     
     def fix(self):
         """Fix function to be implemented by the extended class."""
@@ -67,6 +70,14 @@ class ValidationCheckBase(ABC):
         """Check if the fix method has been implemented."""
         return self.__class__.fix is not ValidationCheckBase.fix
     
+    def has_maya_run(self) -> bool:
+        """Check if the fix method has been implemented."""
+        return self.__class__.run is not ValidationCheckBase.run
+    
+    def has_usd_run(self) -> bool:
+        """Check if the fix method has been implemented."""
+        return self.__class__.usd_run is not ValidationCheckBase.usd_run
+    
     def has_settings(self) -> bool:
         """Check if the implemented class has settings"""
         return self.__class__.settings is not None
@@ -77,6 +88,7 @@ class ValidationCheckBase(ABC):
     def do_run(self, runner):
         """ Wrapper function - may come in handy. """
 
-        result = self.run(runner)
-        return result
+        maya_data = self.run(runner)
+        # usd_data = self.usd_run(runner)
+        return maya_data
 

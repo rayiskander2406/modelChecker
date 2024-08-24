@@ -11,7 +11,7 @@ class DefaultShaderCheck(ValidationCheckBase):
         super().__init__()
         
     def run(self, runner):
-        shaders = []
+        shaders = []        
         for mesh in runner.get_mesh_shape_iterator():
             shadingGrps = cmds.listConnections(mesh, type='shadingEngine')
             if shadingGrps[0] != 'initialShadingGroup':

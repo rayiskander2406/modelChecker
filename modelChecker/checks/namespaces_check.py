@@ -11,9 +11,9 @@ class NamespacesCheck(ValidationCheckBase):
         
     def run(self, runner):
         output = []
-        for node in runner.get_maya_nodes():
-            node_name = maya_utility.get_name_from_uuid(node)
-            if node_name and node_name[-1].isdigit():
-                output.append(node)
+        for uuid in runner.get_maya_nodes():
+            node_name = maya_utility.get_name_from_uuid(uuid)
+            if node_name and ":" in node_name:
+                output.append(uuid)
         
         return output

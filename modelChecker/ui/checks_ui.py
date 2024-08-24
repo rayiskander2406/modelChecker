@@ -76,7 +76,7 @@ class ChecksUI(QtWidgets.QWidget):
         for check_widget in self.checks.values():
             check_widget.reset_ui()  
     
-    def get_all_widgets(self, active: bool):
+    def get_all_widgets(self, active: bool = False):
         sorted_checks = sorted(self.checks.values(), key=lambda widget: (widget.check.category, widget.check.label))
         check_widgets = []
 

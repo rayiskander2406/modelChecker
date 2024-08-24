@@ -2,15 +2,17 @@
 from maya import cmds
 import mayaUsd.lib as mayaUsdLib
 
-
 def get_name_from_uuid(uuid):
-    node_name = cmds.ls(uuid, uuid=True)
+    node_name = cmds.ls(uuid, long=True)
     if node_name:
         return node_name[0]
     return None
 
 def get_uuid_from_name(node):
-    pass
+    node_uuid = cmds.ls(node, uuid=True)
+    if node_uuid:
+        return node_uuid[0]
+    return None
 
 def get_uuid_from_shape(shape_node):
     transform_node = cmds.listRelatives(shape_node, parent=True)[0]
@@ -36,7 +38,7 @@ def get_all_nodes():
                     all_prim_paths = _get_all_prims_from_proxy(child)
                     all_nodes.extend(all_prim_paths)
                 else:
-                    all_nodes.append(get_name_from_uuid(node))
+                    all_nodes.append(get_uuid_from_name(node))
     return all_nodes
 
 

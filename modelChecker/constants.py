@@ -5,7 +5,11 @@ class Severity(Enum):
     MODERATE = auto()
     SEVERE = auto()
     BLOCKING = auto()
-    
+
+class DataType(Enum):
+    MAYA = auto()
+    USD = auto()
+    BOTH = auto()
 
 TITLE = "Model Checker"
 OBJ_NAME = "modelChecker"
