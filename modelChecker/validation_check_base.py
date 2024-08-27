@@ -44,8 +44,7 @@ class ValidationCheckBase(ABC):
                 for component in components:
                     maya_nodes.append(name + COMPONENT_MAPPING[self.node_type].format(component))
             return maya_nodes
-
-                
+                    
     def do_select_error_nodes(self, maya_data, usd_data):
         maya_nodes = self.format_maya_data(maya_data.get(self.name))
         usd_nodes = self.format_usd_data(usd_data.get(self.name))

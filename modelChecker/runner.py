@@ -45,9 +45,16 @@ class Runner(QtCore.QObject):
     def stop(self):
         if self.current_check is not None:
             self.interrupt = True
+            
+    def is_current_context_empty(self):
+        if self.current_context not in self.contexts:
+            return True
+        
+        return self.contexts[self.current_context] == {'maya': {}, 'usd': {}}
+
     
     def run(self, check_widgets, data_type: DataType, refresh_context: bool = True):
-        if refresh_context or not self.contexts[self.current_context]:
+        if refresh_context or self.is_current_context_empty():
             self._setup_context(data_type)
         
         if not self.nodes and not self.usd_nodes:

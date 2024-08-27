@@ -15,7 +15,6 @@ class ParentGeometryCheck(ValidationCheckBase):
         
     def run(self, runner):
         parent_geometry = []
-        
         for uuid in runner.get_maya_nodes():
             node_name = maya_utility.get_name_from_uuid(uuid)
             parents = cmds.listRelatives(node_name, p=True, fullPath=True) or []
@@ -25,3 +24,6 @@ class ParentGeometryCheck(ValidationCheckBase):
                     parent_geometry.append(uuid)
                     
         return parent_geometry
+    
+    
+    

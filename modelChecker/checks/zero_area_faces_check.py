@@ -6,7 +6,6 @@ from modelChecker.constants import NodeType
 from modelChecker.validation_check_base import ValidationCheckBase
 
 
-# TODO: Great opportunity for a settings attribute:
 ZERO_AREA_FACE_TOLERANCE = 0.00001
 
 class ZeroAreaFacesCheck(ValidationCheckBase):

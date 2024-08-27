@@ -20,12 +20,9 @@ class HistoryCheck(ValidationCheckBase):
         history = []
         for uuid in runner.get_maya_nodes():
             node_name = maya_utility.get_name_from_uuid(uuid)
-            
             shape = cmds.listRelatives(node_name, shapes=True, fullPath = True)
-            
             if shape:
                 history_items = cmds.listHistory(shape)
-                
                 for item in history_items:
                     if cmds.nodeType(item) not in EXCLUDED_NODES:
                         history.append(uuid)

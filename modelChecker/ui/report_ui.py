@@ -43,7 +43,6 @@ class ReportUI(QtWidgets.QWidget):
         html = ""
 
         if result_object["maya_nodes"]:
-            last_failed = False
             html += self._render_section_header(result_object, "Maya")
             maya_error_object = result_object['maya_error_object']
             for check_widget in all_check_widgets:
@@ -65,16 +64,16 @@ class ReportUI(QtWidgets.QWidget):
     
     def _render_section_header(self, result_object, data_type):        
         html = f"<h2>Current context: {result_object['context'].capitalize()} ({data_type})</h2>"
-        
+        print(result_object)
         check_widgets = result_object['check_widgets']
         nodes = result_object['maya_nodes'] if data_type == "Maya" else result_object['usd_nodes']
-        
+        error_object = result_object['maya_error_object'] if data_type == "Maya" else result_object['usd_error_object']
         if self.verbosity_level == 0:
             html += f"""
             <table style="margin: 6px; border-spacing: 4px;">
                 <tr>
                     <td>Checks Ran:</td>
-                    <td style="padding-left: 8px;">{len(check_widgets)}</td>
+                    <td style="padding-left: 8px;">{len(error_object)}</td>
                 </tr>
                 <tr>
                     <td>{data_type} Nodes checked:</td>
