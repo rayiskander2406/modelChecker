@@ -5,6 +5,8 @@ from modelChecker.validation_check_base import ValidationCheckBase
 
 from maya import cmds
 
+EXCLUDED_NODES = ['displayLayer', 'renderLayer', 'objectSet', 'groupId']
+
 class HistoryCheck(ValidationCheckBase):
     name = "history"
     label = "History"
@@ -25,7 +27,7 @@ class HistoryCheck(ValidationCheckBase):
                 history_items = cmds.listHistory(shape)
                 
                 for item in history_items:
-                    if cmds.nodeType(item) not in ['displayLayer', 'renderLayer', 'objectSet', 'groupId']:
+                    if cmds.nodeType(item) not in EXCLUDED_NODES:
                         history.append(uuid)
                         break
         return history
