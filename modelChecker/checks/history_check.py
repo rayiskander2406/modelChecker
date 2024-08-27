@@ -19,7 +19,7 @@ class HistoryCheck(ValidationCheckBase):
         for uuid in runner.get_maya_nodes():
             node_name = maya_utility.get_name_from_uuid(uuid)
             
-            shape = cmds.list(node_name, shapes=True, fullPath = True)
+            shape = cmds.listRelatives(node_name, shapes=True, fullPath = True)
             
             if shape:
                 history_items = cmds.listHistory(shape)

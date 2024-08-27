@@ -17,6 +17,6 @@ class EmptyGroupsCheck(ValidationCheckBase):
         empty_groups = []
         for uuid in runner.get_maya_nodes():
             node_name = maya_utility.get_name_from_uuid(uuid)
-            if not cmds.listRelatives(node_name, ad=True):
+            if not cmds.listRelatives(node_name, allDescendents=True):
                 empty_groups.append(uuid)
         return empty_groups
