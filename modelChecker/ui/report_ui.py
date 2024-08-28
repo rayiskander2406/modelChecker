@@ -1,11 +1,13 @@
 from PySide6 import QtWidgets, QtCore
 
 from modelChecker import maya_utility
+from modelChecker.constants import INFO_SYMBOL
+
 
 class ReportUI(QtWidgets.QWidget):
     verbosity_signal = QtCore.Signal()
     
-    def __init__(self, consolidated_report = False):
+    def __init__(self, consolidated_report=False):
         super().__init__()
         self.consolidated_report = consolidated_report
         self.verbosity_level = 0
@@ -25,9 +27,17 @@ class ReportUI(QtWidgets.QWidget):
         self.level_combo_box.addItem("Verbose")
         self.level_combo_box.currentIndexChanged.connect(self.update_verbosity_level)
 
+        self.info = QtWidgets.QLabel(INFO_SYMBOL)        
+        report_style_layout.addWidget(self.level_combo_box, 1)
+        report_style_layout.addWidget(self.info)
         
-        report_style_layout.addWidget(self.level_combo_box)
+        # Initialize the hover widget
+        self.info_hover_widget = InfoHoverWidget(self, text="This is some additional information about the log detail.")
         
+        # Connect events to show/hide the tooltip
+        self.info.enterEvent = self.show_info_tooltip
+        self.info.leaveEvent = self.hide_info_tooltip
+
         self.report_ui = QtWidgets.QTextEdit()
         self.report_ui.setReadOnly(True)
         
@@ -37,7 +47,7 @@ class ReportUI(QtWidgets.QWidget):
     def update_verbosity_level(self, index):
         self.verbosity_level = index
         self.verbosity_signal.emit()
-        
+
     def render_report(self, result_object, all_check_widgets):
         self.report_ui.clear()
         html = ""
@@ -60,11 +70,8 @@ class ReportUI(QtWidgets.QWidget):
                     
         self.report_ui.insertHtml(html)
 
-    
-    
     def _render_section_header(self, result_object, data_type):        
-        html = f"<h2>Current context: {result_object['context'].capitalize()} ({data_type})</h2>"
-        print(result_object)
+        html = f"<h2>{result_object['context'].capitalize()} ({data_type})</h2>"
         check_widgets = result_object['check_widgets']
         nodes = result_object['maya_nodes'] if data_type == "Maya" else result_object['usd_nodes']
         error_object = result_object['maya_error_object'] if data_type == "Maya" else result_object['usd_error_object']
@@ -114,3 +121,44 @@ class ReportUI(QtWidgets.QWidget):
     def clear(self):
         self.report_ui.clear()
         
+    def show_info_tooltip(self, event):
+        """Show the info tooltip when the mouse enters the info label."""
+        position = self.info.mapToGlobal(self.info.rect().bottomLeft())
+        self.info_hover_widget.show_tooltip(position)
+
+    def hide_info_tooltip(self, event):
+        """Hide the info tooltip when the mouse leaves the info label."""
+        self.info_hover_widget.hide_tooltip()
+
+        
+class InfoHoverWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None, text=""):
+        super().__init__(parent, QtCore.Qt.ToolTip)
+        self.setStyleSheet("background-color: #333; color: white; border-radius: 5px; padding: 8px;")
+        
+        layout = QtWidgets.QVBoxLayout(self)
+        
+        overview_text = QtWidgets.QLabel("<b>Overview:</b> Displays the checks and number of nodes failing.")
+        overview_text.setWordWrap(True)
+        
+        default_text = QtWidgets.QLabel("<b>Default:</b> Displays checks and the name of each node name failing, and the amounts of components failing at each node.")
+        default_text.setWordWrap(True)
+        
+        verbose_text = QtWidgets.QLabel("<b>Verbose:</b>Displays the checks, nodes and which components that are failing.")
+        verbose_text.setWordWrap(True)
+        
+        layout.addWidget(overview_text)
+        layout.addWidget(default_text)
+        layout.addWidget(verbose_text)
+        
+        self.setVisible(False)
+    
+    def set_text(self, text):
+        self.label.setText(text)
+    
+    def show_tooltip(self, position):
+        self.move(position)
+        self.setVisible(True)
+    
+    def hide_tooltip(self):
+        self.setVisible(False)

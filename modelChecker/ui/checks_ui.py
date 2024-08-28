@@ -4,6 +4,7 @@ from modelChecker.checks import all_checks
 
 from modelChecker.ui.check_widget import CheckWidget
 from modelChecker.ui.category_widget import CategoryWidget
+from modelChecker.constants import Severity
 
 class ChecksUI(QtWidgets.QWidget):
     select_error_signal = QtCore.Signal(object)
@@ -72,6 +73,18 @@ class ChecksUI(QtWidgets.QWidget):
         self.main_layout.addWidget(button_widget)
 
 
+    def update_checks(self, settings):
+        """Update the check widgets based on the selected preset set."""
+        all_widgets = self.get_all_widgets(active=False)
+        preset_set = settings['preset_set']
+        disabled_checks_visible = settings['disabled_checks_visible']
+        selected_severity = settings['severity'] 
+
+        for check_widget in all_widgets:
+            check_severity = check_widget.check.severity 
+            status = check_severity >= selected_severity and check_widget.check.name in preset_set
+            check_widget.set_status(status, disabled_checks_visible)
+
     def reset_checks(self):
         for check_widget in self.checks.values():
             check_widget.reset_ui()  
@@ -82,7 +95,7 @@ class ChecksUI(QtWidgets.QWidget):
 
         for check_widget in sorted_checks:
             if active:
-                if check_widget.is_checked():
+                if check_widget.is_checked() and check_widget.isEnabled():
                     check_widgets.append(check_widget)
             else:
                 check_widgets.append(check_widget)

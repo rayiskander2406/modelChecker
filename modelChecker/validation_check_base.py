@@ -7,8 +7,9 @@ class ValidationCheckBase(ABC):
     name: str
     label: str
     category: str = "General"
-    severity: Severity = Severity.SEVERE
+    severity: Severity = Severity.MILD
     enabled: bool = True
+    depricated: bool = False
     settings = None
     description = "Common description"
     node_type = NodeType.NODE
@@ -103,7 +104,6 @@ class ValidationCheckBase(ABC):
                             html += f"&nbsp;&nbsp;&#9492;&#9472; <font>{node_name}{formatted_component}</font><br>"
 
             html += "<br>"
-
         return html
 
 
@@ -112,7 +112,6 @@ class ValidationCheckBase(ABC):
     def has_fix(self) -> bool:
         """Check if the fix method has been implemented."""
         return self.__class__.fix is not ValidationCheckBase.fix
-    
     
     def has_settings(self) -> bool:
         """Check if the implemented class has settings"""
@@ -146,8 +145,3 @@ class ValidationCheckBase(ABC):
             return DataType.USD
 
         return None
-
-    
-    def has_usd_run(self) -> bool:
-        """Check if the fix method has been implemented."""
-        return self.__class__.usd_run is not ValidationCheckBase.usd_run

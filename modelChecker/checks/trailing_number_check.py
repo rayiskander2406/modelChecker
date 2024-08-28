@@ -1,3 +1,4 @@
+from modelChecker.constants import Severity
 from modelChecker.validation_check_base import ValidationCheckBase
 from modelChecker import maya_utility
 
@@ -5,7 +6,7 @@ class TrailingNumberCheck(ValidationCheckBase):
     name = "trailing_number"
     label = "Trailing Number"
     category = "Naming"
-    
+    severity = Severity.MODERATE
     def __init__(self):
         super().__init__()
         

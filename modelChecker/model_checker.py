@@ -49,6 +49,7 @@ class UI(QtWidgets.QMainWindow):
         
         self.progress_ui = ProgressUI()
         self.settings_ui = SettingsUI(DataType.MAYA)
+        self.settings_ui.on_settings_changed.connect(self.handle_settings_changed)
         
         self.runner = Runner()
         self.runner.result_signal.connect(self.handle_run_result)
@@ -142,6 +143,9 @@ class UI(QtWidgets.QMainWindow):
     def handle_error_signal(self, data):
         self.report_ui.set_error(data['error'])
         
+    def handle_settings_changed(self, settings):
+        """Handle preset change and update the checks UI."""
+        self.checks_ui.update_checks(settings)
     
     def clear(self):
         self.runner.reset_contexts()

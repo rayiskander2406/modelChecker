@@ -1,8 +1,6 @@
 from PySide6 import QtWidgets, QtCore, QtGui
-from modelChecker.constants import SEVERITY_COLORS, PASS_COLOR
+from modelChecker.constants import SEVERITY_COLORS, PASS_COLOR, INFO_SYMBOL
 from modelChecker.ui.check_tooltip_widget import CheckTooltipWidget
-
-INFO_SYMBOL = "\u24D8" # Unicode for 'ⓘ'
 
 class CheckWidget(QtWidgets.QWidget):
     select_error_signal = QtCore.Signal(object)
@@ -13,7 +11,6 @@ class CheckWidget(QtWidgets.QWidget):
         super().__init__()
         self.check = check()
         self.show_options = False
-        
         
         self.main_layout = QtWidgets.QVBoxLayout(self)
         body_widget = QtWidgets.QWidget()
@@ -28,9 +25,8 @@ class CheckWidget(QtWidgets.QWidget):
         self.info_label.setFixedWidth(20)
         self.info_label.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         
-        self.tooltip = CheckTooltipWidget(self, self.check.description, self.check.get_data_type())
+        self.tooltip = CheckTooltipWidget(self, self.check.description, self.check.severity, self.check.get_data_type())
         
-        # Main check label
         self.check_label = QtWidgets.QLabel(self.check.label)
         self.check_label.setMinimumWidth(180)
         
@@ -107,7 +103,11 @@ class CheckWidget(QtWidgets.QWidget):
             
     def reset_ui(self):
         self.check_label.setStyleSheet('background-color: none')
-            
+        
+    def set_status(self, status, should_hide):
+        self.setEnabled(status)
+        self.setVisible(status or should_hide)
+
     def is_checked(self) -> bool:
         return self.enabled.isChecked()
     
@@ -115,7 +115,6 @@ class CheckWidget(QtWidgets.QWidget):
         self.enabled.setChecked(check)
     
     def select_error(self):
-        """Signal to the runner, to perform the errors"""
         self.select_error_signal.emit(self)
     
     def fix(self):

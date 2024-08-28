@@ -1,24 +1,54 @@
 from enum import Enum, auto
 
+TITLE = "Model Checker"
+OBJ_NAME = "modelChecker"
+
+INFO_SYMBOL = "\u24D8" # Unicode for 'ⓘ'
+
+
 class Severity(Enum):
-    MILD = auto()
-    MODERATE = auto()
-    SEVERE = auto()
-    BLOCKING = auto()
+    MILD = 1
+    MODERATE = 2
+    SEVERE = 3
+    BLOCKING = 4
+
+    def __ge__(self, other):
+        if isinstance(other, Severity):
+            return self.value >= other.value
+        return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, Severity):
+            return self.value > other.value
+        return NotImplemented
+
+    def __le__(self, other):
+        if isinstance(other, Severity):
+            return self.value <= other.value
+        return NotImplemented
+
+    def __lt__(self, other):
+        if isinstance(other, Severity):
+            return self.value < other.value
+        return NotImplemented
 
 class DataType(Enum):
     MAYA = auto()
     USD = auto()
     BOTH = auto()
 
-TITLE = "Model Checker"
-OBJ_NAME = "modelChecker"
+    def __ge__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value >= other.value
+        return NotImplemented
+
+PASS_COLOR = "#446644"
 
 SEVERITY_COLORS = {
-    Severity.MILD: "#444466",        
-    Severity.MODERATE: "#666644",    
-    Severity.SEVERE: "#664444",      
-    Severity.BLOCKING: "#884444",    
+    Severity.MILD: "#666644",        
+    Severity.MODERATE: "#777711",
+    Severity.SEVERE: "#884444",
+    Severity.BLOCKING: "#552222",
 }
 
 class NodeType(Enum):
@@ -28,7 +58,6 @@ class NodeType(Enum):
     FACE = auto()
     NODE = auto()
 
-PASS_COLOR = "#446644"
 
 EXPANDED_LABEL = '\u2193'
 COLLAPSED_LABEL = '\u21B5'

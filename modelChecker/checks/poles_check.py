@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import maya.api.OpenMaya as om
 
-from modelChecker.constants import NodeType
+from modelChecker.constants import NodeType, Severity
 from modelChecker.validation_check_base import ValidationCheckBase
 
 class PolesCheck(ValidationCheckBase):
@@ -10,7 +10,7 @@ class PolesCheck(ValidationCheckBase):
     label = "Poles"
     category = "Topology"
     node_type = NodeType.VERTEX
-    
+    severity = Severity.MILD
     def __init__(self):
         super().__init__()
         

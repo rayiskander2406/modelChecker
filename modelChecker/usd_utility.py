@@ -3,7 +3,6 @@ from pxr import Usd, UsdGeom
 import mayaUsd.lib as mayaUsdLib
 
 def get_stage_from_proxy_shape(proxy_shape):
-    # Use the Maya USD library to get the stage directly from the proxy shape node
     proxy_prim = mayaUsdLib.GetPrim(proxy_shape)
     
     if not proxy_prim.IsValid():

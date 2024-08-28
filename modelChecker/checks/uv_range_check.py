@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 import maya.api.OpenMaya as om
-from modelChecker.constants import NodeType
+from modelChecker.constants import NodeType, Severity
 from modelChecker.validation_check_base import ValidationCheckBase
 
 class UVRangeCheck(ValidationCheckBase):
@@ -9,6 +9,7 @@ class UVRangeCheck(ValidationCheckBase):
     label = "UV Range"
     category = "UVs"
     node_type = NodeType.UV
+    severity = Severity.BLOCKING
     
     def __init__(self):
         super().__init__()

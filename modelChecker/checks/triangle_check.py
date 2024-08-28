@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import maya.api.OpenMaya as om
 
-from modelChecker.constants import NodeType
+from modelChecker.constants import NodeType, Severity
 from modelChecker.validation_check_base import ValidationCheckBase
 
 class TriangleCheck(ValidationCheckBase):
@@ -10,6 +10,7 @@ class TriangleCheck(ValidationCheckBase):
     label = "Triangles"
     category = "Topology"
     node_type = NodeType.FACE
+    severity = Severity.SEVERE
     
     def __init__(self):
         super().__init__()
@@ -22,7 +23,7 @@ class TriangleCheck(ValidationCheckBase):
             uuid = fn.uuid().asString()
             while not face_iterator.isDone():
                 edges = face_iterator.getEdges()
-                if len(edges) > 4:
+                if len(edges) == 3:
                     triangles[uuid].append(face_iterator.index())
                 face_iterator.next()
         return triangles
