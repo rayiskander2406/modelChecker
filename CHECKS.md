@@ -16,6 +16,7 @@ This document describes all available checks in modelChecker, including the acad
   - [Overlapping Vertices](#overlapping-vertices)
   - [Poly Count Limit](#poly-count-limit)
   - [Missing Textures](#missing-textures)
+  - [Default Materials](#default-materials)
 
 ---
 
@@ -346,6 +347,75 @@ Alternative:
 
 ---
 
+### Default Materials
+
+**Category:** Materials
+**Function:** `defaultMaterials`
+**Returns:** Nodes (transforms with meshes using lambert1)
+
+#### Description
+
+Detects meshes that are still assigned to the initialShadingGroup (lambert1), which typically indicates unfinished work. Default gray materials in a submission signal to evaluators that:
+- Texturing/material work was not completed
+- The model may have been rushed
+- Professional standards were not met
+
+#### How It Works
+
+1. For each transform node, gets its mesh shape children
+2. Queries shading engine connections using `cmds.listConnections()`
+3. Flags meshes where the shading group is `initialShadingGroup`
+
+#### Relationship to 'Shaders' Check
+
+This check is complementary to the existing 'Shaders' check:
+- **Shaders check**: Flags objects with NON-default materials
+- **Default Materials check**: Flags objects WITH default materials
+
+Use the appropriate check based on your workflow:
+- If you want to ensure all objects have custom materials: use `defaultMaterials`
+- If you want to find objects that have been textured: use `shaders`
+
+#### Known Limitations
+
+| Limitation | Impact | Workaround |
+|------------|--------|------------|
+| First connection only | Multi-material objects may not be fully checked | Manually verify per-face materials |
+| Multi-material objects | May pass if any face has custom material | Check individual face assignments |
+| Procedural materials | Does not distinguish intentional simple materials | Review flagged objects manually |
+
+#### When This Check Helps
+
+- **Before submission**: Ensure no objects were forgotten during texturing
+- **Quality assurance**: Catch unfinished material work
+- **Professional standards**: Meet industry expectations for complete models
+- **Team review**: Identify incomplete work in collaborative projects
+
+#### How to Fix
+
+In Maya:
+1. Select the flagged object
+2. Create a new material (**Hypershade > Create > Surface > Lambert/Blinn/Phong**)
+3. Right-click the material > **Assign Material to Selection**
+
+Quick fix for multiple objects:
+1. Select all flagged objects
+2. Create one material and assign to all
+3. Or use **Edit > Select All by Type > Polygon** then assign material
+
+#### Test Cases
+
+| Test | Expected Result |
+|------|-----------------|
+| Cube with lambert1 | FAIL (flagged) |
+| Cube with custom lambert | PASS |
+| Cube with phong | PASS |
+| Multiple objects (mixed) | Only default-material objects flagged |
+| Empty group | PASS (not a mesh) |
+| Locator | PASS (not a mesh) |
+
+---
+
 ## Adding New Checks
 
 To add a new check to modelChecker:
@@ -382,3 +452,4 @@ To add a new check to modelChecker:
 | 0.2.1 | Academic extension: Added overlappingVertices check |
 | 0.2.2 | Academic extension: Added polyCountLimit check |
 | 0.2.3 | Academic extension: Added missingTextures check |
+| 0.2.4 | Academic extension: Added defaultMaterials check |

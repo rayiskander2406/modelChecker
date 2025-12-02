@@ -680,3 +680,55 @@ def missingTextures(nodes, _):
                 missingFiles.append(uuid[0])
 
     return "nodes", missingFiles
+
+
+def defaultMaterials(transformNodes, _):
+    """Detect meshes still using the default lambert1 material.
+
+    This check identifies meshes that are assigned to the initialShadingGroup
+    (lambert1), which typically indicates unfinished work. Default gray
+    materials in a submission signal to evaluators that:
+    - Texturing/material work was not completed
+    - The model may have been rushed
+    - Professional standards were not met
+
+    Algorithm:
+        1. For each transform node, get its shape(s)
+        2. Query shading engine connections
+        3. Flag meshes connected to 'initialShadingGroup'
+
+    Args:
+        transformNodes: List of transform node UUIDs to check
+        _: MSelectionList (not used for this check)
+
+    Returns:
+        tuple: ("nodes", list) where list contains UUIDs of transforms
+               whose meshes use the default material (lambert1)
+
+    Known Limitations:
+        - Only checks the first shading group connection
+        - Multi-material objects may pass if any face has non-default material
+        - Does not distinguish between lambert1 and other procedural materials
+
+    Academic Use:
+        In academic projects, using default materials signals incomplete work.
+        Evaluators expect students to create and assign proper materials,
+        even for simple models. This check catches objects that were
+        forgotten during the texturing phase.
+    """
+    defaultMats = []
+
+    for node in transformNodes:
+        nodeName = _getNodeName(node)
+        shape = cmds.listRelatives(nodeName, shapes=True, fullPath=True)
+
+        if shape and cmds.nodeType(shape[0]) == 'mesh':
+            # Get shading engines connected to this shape
+            shadingGrps = cmds.listConnections(shape, type='shadingEngine')
+
+            if shadingGrps:
+                # Check if using initialShadingGroup (lambert1)
+                if shadingGrps[0] == 'initialShadingGroup':
+                    defaultMats.append(node)
+
+    return "nodes", defaultMats

@@ -118,5 +118,9 @@ mcCommandsList = {
     "missingTextures": {
         'label': 'Missing Textures',
         'category': 'materials',
+    },
+    "defaultMaterials": {
+        'label': 'Default Materials',
+        'category': 'materials',
     }
 }

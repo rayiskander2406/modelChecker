@@ -562,11 +562,11 @@
                 name: 'Default Materials',
                 category: 'materials',
                 phase: 1,
-                status: 'planned',
+                status: 'completed',
                 icon: '⬜',
                 description: 'Identifies objects still using the default lambert1 shader, indicating unfinished texturing work.',
                 whyMatters: 'Default gray materials signal incomplete work to evaluators.',
-                howItWorks: 'Checks shader connections for each mesh and flags those using initialShadingGroup.',
+                howItWorks: 'Checks shader connections for each mesh via cmds.listConnections() and flags those using initialShadingGroup.',
                 commonCauses: 'Forgetting to assign materials, incomplete texturing pass'
             },
             {
