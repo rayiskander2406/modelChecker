@@ -526,12 +526,12 @@
                 name: 'Overlapping Vertices',
                 category: 'topology',
                 phase: 1,
-                status: 'planned',
+                status: 'implemented',
                 icon: '📍',
                 description: 'Finds vertices that occupy the same position in space, causing shading artifacts and export problems.',
                 whyMatters: 'Overlapping vertices create invisible geometry issues that are hard to debug later.',
-                howItWorks: 'Compares vertex positions within a small tolerance threshold.',
-                commonCauses: 'Duplicated geometry, failed merges, copy-paste errors'
+                howItWorks: 'Uses spatial hashing to efficiently compare vertex positions within 0.0001 unit tolerance.',
+                commonCauses: 'Duplicated geometry, failed merges, copy-paste errors, combine without merge'
             },
             {
                 id: 'polyCountLimit',

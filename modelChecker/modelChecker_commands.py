@@ -442,3 +442,111 @@ def flippedNormals(_, SLMesh):
             faceIt.next()
         selIt.next()
     return "polygon", flippedNormals
+
+
+def overlappingVertices(_, SLMesh):
+    """Detect vertices that occupy the same position (stacked/overlapping vertices).
+
+    This check identifies vertices that share the same spatial coordinates within
+    a tolerance threshold. Overlapping vertices are a common issue that causes:
+    - Shading artifacts (pinching, dark spots)
+    - Problems with edge flow and topology
+    - Export issues (FBX, OBJ may produce unexpected results)
+    - Difficulty with proper welding/merging
+
+    Algorithm:
+        1. Get all vertex positions using MFnMesh.getPoints()
+        2. Build a spatial hash grid for efficient O(n) comparison
+        3. For each vertex, check nearby vertices within tolerance
+        4. Report vertices that share positions with other vertices
+
+    Args:
+        _: Unused parameter (node list, maintained for API consistency)
+        SLMesh: MSelectionList containing mesh shapes to check
+
+    Returns:
+        tuple: ("vertex", dict) where dict maps UUID -> list of vertex indices
+               that have overlapping positions
+
+    Known Limitations:
+        - Default tolerance of 0.0001 may need adjustment for very small models
+        - Does not distinguish between intentionally stacked vertices (e.g., for
+          UV seams) and accidental overlaps
+        - For meshes with UV seams, some "overlapping" vertices are expected
+          behavior; use in conjunction with merge vertex operations
+
+    Academic Use:
+        Overlapping vertices often result from:
+        - Incomplete merge operations after combining meshes
+        - Accidental duplicate vertex creation
+        - Boolean operations that leave stacked geometry
+        Students should merge vertices or investigate why overlaps exist.
+    """
+    overlapping = defaultdict(list)
+    tolerance = 0.0001  # Position tolerance for overlap detection
+
+    selIt = om.MItSelectionList(SLMesh)
+    while not selIt.isDone():
+        dagPath = selIt.getDagPath()
+        mesh = om.MFnMesh(dagPath)
+        fn = om.MFnDependencyNode(dagPath.node())
+        uuid = fn.uuid().asString()
+
+        # Get all vertex positions in world space
+        points = mesh.getPoints(om.MSpace.kWorld)
+        numVerts = len(points)
+
+        if numVerts == 0:
+            selIt.next()
+            continue
+
+        # Build spatial hash for efficient lookup
+        # Grid cell size slightly larger than tolerance
+        cellSize = tolerance * 10
+        spatialHash = defaultdict(list)
+
+        for i, pt in enumerate(points):
+            # Calculate grid cell for this vertex
+            cellX = int(pt.x / cellSize)
+            cellY = int(pt.y / cellSize)
+            cellZ = int(pt.z / cellSize)
+            spatialHash[(cellX, cellY, cellZ)].append((i, pt))
+
+        # Track vertices we've already marked as overlapping
+        markedVerts = set()
+
+        # Check each vertex against nearby vertices
+        for i, pt in enumerate(points):
+            if i in markedVerts:
+                continue
+
+            cellX = int(pt.x / cellSize)
+            cellY = int(pt.y / cellSize)
+            cellZ = int(pt.z / cellSize)
+
+            # Check this cell and adjacent cells
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    for dz in (-1, 0, 1):
+                        cell = (cellX + dx, cellY + dy, cellZ + dz)
+                        if cell in spatialHash:
+                            for j, otherPt in spatialHash[cell]:
+                                if j <= i:
+                                    continue  # Only compare forward to avoid duplicates
+
+                                # Calculate distance
+                                dist = ((pt.x - otherPt.x) ** 2 +
+                                       (pt.y - otherPt.y) ** 2 +
+                                       (pt.z - otherPt.z) ** 2) ** 0.5
+
+                                if dist < tolerance:
+                                    # Both vertices overlap
+                                    if i not in markedVerts:
+                                        overlapping[uuid].append(i)
+                                        markedVerts.add(i)
+                                    if j not in markedVerts:
+                                        overlapping[uuid].append(j)
+                                        markedVerts.add(j)
+
+        selIt.next()
+    return "vertex", overlapping

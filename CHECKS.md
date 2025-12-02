@@ -13,6 +13,7 @@ This document describes all available checks in modelChecker, including the acad
   - [UVs](#uvs)
 - [Academic Extension Checks](#academic-extension-checks)
   - [Flipped Normals](#flipped-normals)
+  - [Overlapping Vertices](#overlapping-vertices)
 
 ---
 
@@ -131,6 +132,71 @@ In Maya:
 
 ---
 
+### Overlapping Vertices
+
+**Category:** Topology
+**Function:** `overlappingVertices`
+**Returns:** Vertex indices
+
+#### Description
+
+Detects vertices that occupy the same spatial position within a tolerance threshold (0.0001 units). Overlapping vertices are a common issue that causes:
+- Shading artifacts (pinching, dark spots)
+- Problems with edge flow and topology
+- Export issues (FBX, OBJ may produce unexpected results)
+- Difficulty with proper welding/merging
+
+#### How It Works
+
+1. Gets all vertex positions using MFnMesh.getPoints()
+2. Builds a spatial hash grid for efficient O(n) comparison
+3. For each vertex, checks nearby vertices within tolerance
+4. Reports all vertices that share positions with other vertices
+
+The spatial hash approach ensures the check runs efficiently even on high-poly meshes by avoiding O(n^2) comparisons.
+
+#### Known Limitations
+
+| Limitation | Impact | Workaround |
+|------------|--------|------------|
+| Fixed tolerance (0.0001) | Very small models may not detect close vertices | Scale up model temporarily for checking |
+| UV seam vertices | Intentional overlaps at UV seams will be flagged | Review flagged vertices - seam overlaps are expected |
+| Blend shape vertices | Intentionally stacked vertices for morphing | Verify if overlaps are part of deformation setup |
+
+#### When This Check Helps
+
+- **After combining meshes**: Catches vertices that weren't merged after polyUnite
+- **Boolean operations**: Booleans often leave stacked vertices at intersection edges
+- **Imported geometry**: Some file formats create duplicate vertices
+- **Cleanup before export**: Ensures clean geometry for game engines
+
+#### When to Ignore Results
+
+- UV seam boundaries (vertices at same position with different UVs)
+- Blend shape base meshes with intentional stacking
+- Geometry intended for specific deformation rigs
+
+#### How to Fix
+
+In Maya:
+1. Select the mesh
+2. Go to **Edit Mesh > Merge > Merge Vertices**
+3. Set threshold to match check tolerance (0.0001)
+4. Or use **Mesh > Cleanup** with "Merge vertices" option
+5. Re-run the check to verify
+
+#### Test Cases
+
+| Test | Expected Result |
+|------|-----------------|
+| Clean cube | PASS (0 overlapping vertices) |
+| Combined cubes without merge | FAIL (8 overlapping vertices at shared face) |
+| Vertex extruded with length 0 | FAIL (2 stacked vertices) |
+| Empty selection | PASS (graceful handling) |
+| Clean sphere | PASS (0 overlapping vertices) |
+
+---
+
 ## Adding New Checks
 
 To add a new check to modelChecker:
@@ -164,3 +230,4 @@ To add a new check to modelChecker:
 |---------|---------|
 | 0.1.4 | Original release with 27 checks |
 | 0.2.0 | Academic extension: Added flippedNormals check |
+| 0.2.1 | Academic extension: Added overlappingVertices check |

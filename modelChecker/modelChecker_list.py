@@ -106,5 +106,9 @@ mcCommandsList = {
     "flippedNormals": {
         'label': 'Flipped Normals',
         'category': 'topology',
+    },
+    "overlappingVertices": {
+        'label': 'Overlapping Vertices',
+        'category': 'topology',
     }
 }
