@@ -16,7 +16,7 @@
 
 ## About This Project
 
-This is an **Academic Extension** of the original [mayaLint](https://github.com/JakobJK/mayaLint) plugin, specifically enhanced for digital design students to self-evaluate their 3D models before submission.
+This is an **Academic Extension** of the original [modelChecker](https://github.com/JakobJK/modelChecker) plugin by Jakob Kousholt, specifically enhanced for digital design students to self-evaluate their 3D models before submission.
 
 The extension adds new quality checks commonly required in academic evaluations, such as flipped normals detection, overlapping vertices, and more.
 
@@ -27,7 +27,7 @@ This project is built upon the excellent work of:
 - **[Jakob Kousholt](https://www.linkedin.com/in/jakobjk/)** - Original Author, Software Engineer
 - **[Niels Peter Kaagaard](https://www.linkedin.com/in/niels-peter-kaagaard-146b8a13)** - Original Author, Senior Modeler at Weta Digital
 
-Original repository: [github.com/JakobJK/mayaLint](https://github.com/JakobJK/mayaLint)
+Original repository: [github.com/JakobJK/modelChecker](https://github.com/JakobJK/modelChecker)
 
 ---
 
@@ -205,12 +205,12 @@ See: **[CHECKS.md](./CHECKS.md)**
 
 ## License
 
-This project is licensed under the [MIT License](https://rem.mit-license.org/), same as the original mayaLint.
+This project is licensed under the [MIT License](https://rem.mit-license.org/), same as the original modelChecker.
 
 ---
 
 ## Acknowledgments
 
-Special thanks to **Jakob Kousholt** and **Niels Peter Kaagaard** for creating and open-sourcing the original mayaLint plugin. Their work has helped countless artists validate their 3D models.
+Special thanks to **Jakob Kousholt** and **Niels Peter Kaagaard** for creating and open-sourcing the original modelChecker plugin. Their work has helped countless artists validate their 3D models.
 
 If you find this tool useful, consider supporting the original authors on [Gumroad](https://jakejk.gumroad.com/l/htZYj).

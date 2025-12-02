@@ -4,7 +4,7 @@ Thank you for your interest in contributing to the mayaLint Academic Extension! 
 
 ## Overview
 
-This project extends the original [mayaLint](https://github.com/JakobJK/mayaLint) Maya plugin with 15 additional checks designed for academic evaluation of 3D models.
+This project extends the original [modelChecker](https://github.com/JakobJK/modelChecker) Maya plugin with 15 additional checks designed for academic evaluation of 3D models.
 
 ## Development Workflow
 

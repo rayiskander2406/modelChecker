@@ -108,7 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Links
 
-- [Original mayaLint](https://github.com/JakobJK/mayaLint)
-- [Academic Extension Fork](https://github.com/rayiskander2406/mayaLint)
+- [Original modelChecker](https://github.com/JakobJK/modelChecker)
+- [MayaLint Academic Extension](https://github.com/rayiskander2406/modelChecker)
 - [UI Preview](https://modelchecker-preview-guhxbb6ow-rayiskander2406s-projects.vercel.app)
 - [Checks Overview](https://modelchecker-preview-guhxbb6ow-rayiskander2406s-projects.vercel.app/checks-overview.html)
