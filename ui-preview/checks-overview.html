@@ -588,11 +588,11 @@
                 name: 'UV Distortion',
                 category: 'UVs',
                 phase: 2,
-                status: 'planned',
+                status: 'completed',
                 icon: '🔶',
                 description: 'Detects stretched or compressed UV shells that will cause textures to appear warped or blurry.',
                 whyMatters: 'UV distortion ruins texture quality and is immediately visible in final renders.',
-                howItWorks: 'Calculates the ratio between 3D face area and UV face area to detect stretching.',
+                howItWorks: 'Compares 3D face area to UV face area using shoelace formula, normalized against median ratio.',
                 commonCauses: 'Poor UV unwrapping, automatic projections without cleanup'
             },
             {

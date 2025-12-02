@@ -797,3 +797,133 @@ def sceneUnits(_, __):
             currentUnit, EXPECTED_LINEAR_UNIT)]
 
     return "nodes", []
+
+
+# UV distortion threshold - ratio of UV area to 3D area deviation
+# A ratio significantly different from 1.0 indicates stretching/compression
+# Default: 0.5 means UV area is 50% of expected, 2.0 means 200% (stretched)
+UV_DISTORTION_THRESHOLD = 0.5  # Min ratio (below = compressed)
+UV_DISTORTION_THRESHOLD_MAX = 2.0  # Max ratio (above = stretched)
+
+
+def uvDistortion(_, SLMesh):
+    """Detect polygons with stretched or compressed UV coordinates.
+
+    This check identifies faces where the UV mapping is significantly
+    distorted relative to the 3D geometry. UV distortion causes:
+    - Blurry or stretched textures
+    - Visible seams and artifacts
+    - Inconsistent texture resolution across the model
+    - Professional quality issues in renders
+
+    Algorithm:
+        1. For each polygon, calculate its 3D world-space area
+        2. Calculate the corresponding UV-space area
+        3. Compute the ratio: UV_area / (3D_area * normalization_factor)
+        4. Flag faces where ratio is outside threshold bounds
+
+    The normalization factor accounts for the fact that UV space (0-1)
+    and world space (scene units) have different scales. We use the
+    mesh's average ratio as the baseline for comparison.
+
+    Args:
+        _: Not used
+        SLMesh: MSelectionList containing mesh shapes to check
+
+    Returns:
+        tuple: ("polygon", dict) where dict maps UUID -> list of
+               polygon indices with UV distortion
+
+    Configuration:
+        UV_DISTORTION_THRESHOLD (default 0.5): Min ratio threshold
+        UV_DISTORTION_THRESHOLD_MAX (default 2.0): Max ratio threshold
+        Ratios outside this range are flagged as distorted.
+
+    Known Limitations:
+        - Requires UVs to exist (faces without UVs are skipped)
+        - Uses simple area comparison, not angle-based distortion
+        - May flag intentionally scaled UVs (e.g., tiled textures)
+        - Threshold is uniform; doesn't account for artistic intent
+
+    Academic Use:
+        UV distortion is one of the most visible quality issues in
+        3D models. Stretched textures immediately signal poor craftsmanship
+        to evaluators and are a common point deduction in assignments.
+    """
+    import math
+
+    distortedFaces = defaultdict(list)
+
+    selIt = om.MItSelectionList(SLMesh)
+    while not selIt.isDone():
+        dagPath = selIt.getDagPath()
+        mesh = om.MFnMesh(dagPath)
+        fn = om.MFnDependencyNode(dagPath.node())
+        uuid = fn.uuid().asString()
+
+        # First pass: calculate average ratio for normalization
+        ratios = []
+        faceIt = om.MItMeshPolygon(dagPath)
+        while not faceIt.isDone():
+            if faceIt.hasUVs():
+                # Get 3D area
+                area3D = faceIt.getArea()
+
+                # Get UV area - need to calculate from UV coordinates
+                try:
+                    uvs = faceIt.getUVs()
+                    uvArea = _calculateUVPolygonArea(uvs[0], uvs[1])
+
+                    if area3D > 0.0001 and uvArea > 0.0000001:
+                        ratio = uvArea / area3D
+                        ratios.append((faceIt.index(), ratio, area3D, uvArea))
+                except:
+                    pass  # Skip faces with UV errors
+
+            faceIt.next()
+
+        # Calculate median ratio for normalization
+        if not ratios:
+            selIt.next()
+            continue
+
+        sortedRatios = sorted([r[1] for r in ratios])
+        medianRatio = sortedRatios[len(sortedRatios) // 2]
+
+        if medianRatio < 0.0000001:
+            selIt.next()
+            continue
+
+        # Second pass: flag faces that deviate significantly from median
+        for faceIdx, ratio, area3D, uvArea in ratios:
+            normalizedRatio = ratio / medianRatio
+
+            if normalizedRatio < UV_DISTORTION_THRESHOLD or normalizedRatio > UV_DISTORTION_THRESHOLD_MAX:
+                distortedFaces[uuid].append(faceIdx)
+
+        selIt.next()
+
+    return "polygon", distortedFaces
+
+
+def _calculateUVPolygonArea(uCoords, vCoords):
+    """Calculate the area of a polygon in UV space using the shoelace formula.
+
+    Args:
+        uCoords: List of U coordinates
+        vCoords: List of V coordinates
+
+    Returns:
+        float: Area of the polygon in UV space
+    """
+    n = len(uCoords)
+    if n < 3:
+        return 0.0
+
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += uCoords[i] * vCoords[j]
+        area -= uCoords[j] * vCoords[i]
+
+    return abs(area) / 2.0

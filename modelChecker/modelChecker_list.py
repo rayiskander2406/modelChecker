@@ -126,5 +126,9 @@ mcCommandsList = {
     "sceneUnits": {
         'label': 'Scene Units',
         'category': 'scene',
+    },
+    "uvDistortion": {
+        'label': 'UV Distortion',
+        'category': 'UVs',
     }
 }

@@ -18,6 +18,7 @@ This document describes all available checks in modelChecker, including the acad
   - [Missing Textures](#missing-textures)
   - [Default Materials](#default-materials)
   - [Scene Units](#scene-units)
+  - [UV Distortion](#uv-distortion)
 
 ---
 
@@ -498,6 +499,86 @@ In Maya:
 
 ---
 
+### UV Distortion
+
+**Category:** UVs
+**Function:** `uvDistortion`
+**Returns:** Polygon faces with distorted UV mapping
+
+#### Description
+
+Detects polygons where UV mapping is significantly stretched or compressed relative to the 3D geometry. UV distortion causes:
+- Blurry or stretched textures
+- Visible seams and artifacts
+- Inconsistent texture resolution across the model
+- Professional quality issues in renders
+
+This is one of the most visible quality issues in 3D models and is commonly checked by evaluators.
+
+#### How It Works
+
+1. For each polygon, calculate 3D world-space area using `MItMeshPolygon.getArea()`
+2. Calculate UV-space area using the shoelace formula on UV coordinates
+3. Compute ratio: `UV_area / 3D_area`
+4. Normalize against median ratio to handle different overall UV scales
+5. Flag faces where normalized ratio is outside threshold bounds
+
+The normalization using median ratio accounts for the fact that different models may have different overall UV scales (some use 0-1, others use multiple UV tiles).
+
+#### Configuration
+
+To adjust sensitivity, edit these constants in `modelChecker_commands.py`:
+
+```python
+UV_DISTORTION_THRESHOLD = 0.5      # Min ratio (below = compressed)
+UV_DISTORTION_THRESHOLD_MAX = 2.0  # Max ratio (above = stretched)
+```
+
+- Lower min threshold = more tolerant of compressed UVs
+- Higher max threshold = more tolerant of stretched UVs
+
+#### Known Limitations
+
+| Limitation | Impact | Workaround |
+|------------|--------|------------|
+| Requires UVs | Faces without UVs are skipped | Use Missing UVs check first |
+| Area-based only | Shearing may not be caught if area preserved | Visual inspection for shear |
+| Intentional scaling | May flag tiled/detail textures | Review flagged faces manually |
+| Uniform threshold | Same threshold for all faces | Adjust per project needs |
+
+#### When This Check Helps
+
+- **Texture quality**: Ensure textures render clearly without stretching
+- **Before submission**: Catch UV issues before evaluation
+- **After UV operations**: Verify UVs after projection or editing
+- **After geometry changes**: Check UVs after scaling or deforming mesh
+
+#### How to Fix
+
+In Maya:
+1. Select the flagged polygon faces
+2. Open **UV Editor** (Windows > UV Editor)
+3. Use **UV > Unfold** to relax the UVs
+4. Or use **UV > Relax** for gentle correction
+5. For severe distortion, re-project the UVs
+
+Quick workflow:
+1. Select all flagged faces
+2. **UV > Automatic** for quick fix
+3. **UV > Optimize** to reduce overall distortion
+
+#### Test Cases
+
+| Test | Expected Result |
+|------|-----------------|
+| Uniform cube with auto UVs | PASS |
+| Plane with stretched UVs | FAIL (flags distorted faces) |
+| Mesh without UVs | PASS (skipped, no UVs) |
+| Sphere (pole distortion) | May flag pole faces (expected) |
+| Configurable threshold | Tighter threshold catches more |
+
+---
+
 ## Adding New Checks
 
 To add a new check to modelChecker:
@@ -536,3 +617,4 @@ To add a new check to modelChecker:
 | 0.2.3 | Academic extension: Added missingTextures check |
 | 0.2.4 | Academic extension: Added defaultMaterials check |
 | 0.2.5 | Academic extension: Added sceneUnits check |
+| 0.2.6 | Academic extension: Added uvDistortion check |
