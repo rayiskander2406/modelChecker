@@ -1110,6 +1110,88 @@ cmds.parent('geo_cube', 'grp_geometry')
 
 ---
 
+### Concave Faces
+
+**Category:** Topology
+**Function:** `concaveFaces`
+**Returns:** Polygon (face indices that are concave)
+
+#### Description
+
+Detects polygon faces that are concave (non-convex). A convex polygon has all
+interior angles less than 180 degrees, meaning any line between two interior
+points stays inside the polygon.
+
+Concave faces can cause:
+- Unpredictable triangulation during rendering
+- Rendering artifacts and shading errors
+- Boolean operation failures
+- Issues with subdivision surfaces
+- Problems when exporting to game engines
+
+#### How It Works
+
+1. Iterate through each polygon face in the mesh
+2. Use Maya's built-in `isConvex()` method on MItMeshPolygon
+3. Flag faces that return False (non-convex)
+4. Triangles are always convex by definition and are skipped
+
+#### Convex vs Concave
+
+| Type | Description | Example |
+|------|-------------|---------|
+| Convex | All interior angles < 180° | Square, pentagon, cube face |
+| Concave | At least one angle > 180° | L-shape, star, arrow |
+
+#### Known Limitations
+
+| Limitation | Impact | Workaround |
+|------------|--------|------------|
+| No severity metric | Can't distinguish slight vs severe | Visual inspection |
+| Floating point | Very small angles may miss | Threshold-based would be complex |
+| Triangles skipped | Always convex by definition | N/A (correct behavior) |
+| No angle data | Can't show which vertex | Manual inspection |
+
+#### When This Check Helps
+
+- Preparing geometry for boolean operations
+- Debugging rendering artifacts
+- Cleaning up after mesh operations
+- Game engine export preparation
+- Teaching proper topology practices
+
+#### How to Fix
+
+In Maya, fix concave faces:
+1. Select the flagged faces
+2. Use `Mesh > Triangulate` to break into triangles
+3. Or manually adjust vertices to make convex
+4. Or use `Mesh > Cleanup` with Cleanup settings
+
+Best practice: Maintain clean quad topology during modeling:
+```python
+import maya.cmds as cmds
+# Select concave faces
+cmds.select('mesh.f[5]', 'mesh.f[12]')
+# Triangulate to fix
+cmds.polyTriangulate()
+```
+
+#### Test Cases
+
+| Test | Expected Result |
+|------|-----------------|
+| Convex quad (square) | PASS |
+| Concave quad (L-shape) | FAIL (flagged) |
+| Triangle | PASS (always convex) |
+| Cube (all convex) | PASS |
+| Concave n-gon (arrow) | FAIL (flagged) |
+| Star shape | FAIL (flagged) |
+| Mixed mesh | Only concave flagged |
+| Empty selection | PASS (no crash) |
+
+---
+
 ## Adding New Checks
 
 To add a new check to modelChecker:

@@ -1514,3 +1514,63 @@ def hierarchyDepth(transformNodes, _):
             tooDeepNodes.append(node)
 
     return "nodes", tooDeepNodes
+
+
+def concaveFaces(_, SLMesh):
+    """Detect concave (non-convex) polygon faces.
+
+    This check identifies polygon faces that are not convex. A convex polygon
+    is one where all interior angles are less than 180 degrees, and any line
+    segment between two points inside the polygon stays entirely inside.
+    Concave faces can cause:
+    - Unpredictable triangulation during rendering
+    - Rendering artifacts and shading errors
+    - Boolean operation failures
+    - Issues with subdivision surfaces
+    - Problems when exporting to game engines
+
+    Algorithm:
+        1. Iterate through each polygon face in the mesh
+        2. Use Maya's built-in isConvex() method on MItMeshPolygon
+        3. Flag faces that return False (non-convex)
+        4. Triangles are always convex, so they pass automatically
+
+    Args:
+        _: List of node UUIDs (not used for this check)
+        SLMesh: MSelectionList containing mesh shapes to check
+
+    Returns:
+        tuple: ("polygon", dict) where dict maps UUID -> list of
+               face indices that are concave
+
+    Known Limitations:
+        - Does not distinguish between slightly and severely concave faces
+        - Very small concave angles may not be detected due to floating point
+        - Triangles are always convex by definition (never flagged)
+        - Does not provide severity metric or angle measurement
+
+    Academic Use:
+        Concave faces often result from careless modeling or complex boolean
+        operations. Students should understand that clean quad topology with
+        convex faces produces more predictable results in rendering and
+        game engines.
+    """
+    concave = defaultdict(list)
+
+    selIt = om.MItSelectionList(SLMesh)
+    while not selIt.isDone():
+        faceIt = om.MItMeshPolygon(selIt.getDagPath())
+        fn = om.MFnDependencyNode(selIt.getDagPath().node())
+        uuid = fn.uuid().asString()
+
+        while not faceIt.isDone():
+            # Triangles are always convex, skip them for efficiency
+            if faceIt.polygonVertexCount() > 3:
+                # isConvex() returns True for convex faces
+                if not faceIt.isConvex():
+                    concave[uuid].append(faceIt.index())
+            faceIt.next()
+
+        selIt.next()
+
+    return "polygon", concave

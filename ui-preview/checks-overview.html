@@ -674,11 +674,11 @@
                 name: 'Concave Faces',
                 category: 'topology',
                 phase: 3,
-                status: 'planned',
+                status: 'completed',
                 icon: '⚠️',
                 description: 'Identifies concave (non-convex) polygons that can cause rendering artifacts and boolean failures.',
                 whyMatters: 'Concave faces triangulate unpredictably and may render incorrectly.',
-                howItWorks: 'Analyzes polygon vertex positions to determine convexity.',
+                howItWorks: 'Uses Maya\'s isConvex() method on each polygon face. Triangles are skipped (always convex).',
                 commonCauses: 'Complex edge flows, merged vertices creating irregular shapes'
             },
             {

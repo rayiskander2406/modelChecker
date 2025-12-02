@@ -154,5 +154,9 @@ mcCommandsList = {
     "hierarchyDepth": {
         'label': 'Hierarchy Depth',
         'category': 'general',
+    },
+    "concaveFaces": {
+        'label': 'Concave Faces',
+        'category': 'topology',
     }
 }
