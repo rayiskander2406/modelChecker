@@ -538,11 +538,11 @@
                 name: 'Poly Count Limit',
                 category: 'general',
                 phase: 1,
-                status: 'planned',
+                status: 'implemented',
                 icon: '📊',
-                description: 'Verifies that models stay within a configurable polygon budget, essential for game assets and real-time applications.',
+                description: 'Verifies that models stay within a configurable polygon budget (default: 10,000 polys per mesh).',
                 whyMatters: 'Academic projects often have strict poly limits. Exceeding them means automatic point deductions.',
-                howItWorks: 'Counts total faces across selected meshes and compares against configurable limit.',
+                howItWorks: 'Counts polygons per mesh using MFnMesh.numPolygons and compares against configurable POLY_COUNT_LIMIT.',
                 commonCauses: 'Over-detailing, unnecessary subdivisions, unoptimized meshes'
             },
             {

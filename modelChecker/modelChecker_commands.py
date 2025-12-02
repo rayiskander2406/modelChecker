@@ -556,3 +556,64 @@ def overlappingVertices(_, SLMesh):
 
         selIt.next()
     return "vertex", overlapping
+
+
+# Default polygon limit per mesh (can be customized)
+POLY_COUNT_LIMIT = 10000
+
+
+def polyCountLimit(nodes, SLMesh):
+    """Detect meshes that exceed the polygon count limit.
+
+    This check identifies meshes with more polygons than the configured limit.
+    Exceeding polygon budgets is a common issue in academic projects where
+    assignments often have strict poly count requirements.
+
+    Algorithm:
+        1. For each mesh in the selection, get the polygon count using MFnMesh
+        2. Compare against the configured limit (default: 10,000 polygons)
+        3. Flag meshes that exceed the limit
+
+    Args:
+        nodes: List of node UUIDs to check
+        SLMesh: MSelectionList containing mesh shapes to check
+
+    Returns:
+        tuple: ("nodes", list) where list contains UUIDs of meshes
+               that exceed the polygon limit
+
+    Configuration:
+        The default limit is 10,000 polygons per mesh. To customize:
+        - Edit POLY_COUNT_LIMIT at the top of this file
+        - Common academic limits: 5000, 10000, 15000, 50000
+
+    Known Limitations:
+        - Checks per-mesh, not total scene polygon count
+        - Does not account for instances (each instance is counted separately)
+        - Subdivision preview levels are not included in count
+
+    Academic Use:
+        Most academic 3D assignments specify polygon budgets:
+        - Game character: 5,000 - 15,000 polys
+        - Game prop: 500 - 5,000 polys
+        - Environment asset: varies by scope
+        Exceeding the limit typically results in point deductions.
+    """
+    overLimit = []
+
+    selIt = om.MItSelectionList(SLMesh)
+    while not selIt.isDone():
+        dagPath = selIt.getDagPath()
+        mesh = om.MFnMesh(dagPath)
+        fn = om.MFnDependencyNode(dagPath.node())
+        uuid = fn.uuid().asString()
+
+        # Get polygon count
+        polyCount = mesh.numPolygons
+
+        if polyCount > POLY_COUNT_LIMIT:
+            overLimit.append(uuid)
+
+        selIt.next()
+
+    return "nodes", overLimit

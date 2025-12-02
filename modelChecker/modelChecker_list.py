@@ -110,5 +110,9 @@ mcCommandsList = {
     "overlappingVertices": {
         'label': 'Overlapping Vertices',
         'category': 'topology',
+    },
+    "polyCountLimit": {
+        'label': 'Poly Count Limit',
+        'category': 'general',
     }
 }

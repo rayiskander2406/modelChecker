@@ -14,6 +14,7 @@ This document describes all available checks in modelChecker, including the acad
 - [Academic Extension Checks](#academic-extension-checks)
   - [Flipped Normals](#flipped-normals)
   - [Overlapping Vertices](#overlapping-vertices)
+  - [Poly Count Limit](#poly-count-limit)
 
 ---
 
@@ -202,6 +203,80 @@ In Maya:
 
 ---
 
+### Poly Count Limit
+
+**Category:** General
+**Function:** `polyCountLimit`
+**Returns:** Nodes (entire meshes that exceed limit)
+
+#### Description
+
+Detects meshes that exceed a configurable polygon count limit. This is essential for academic projects where assignments typically have strict polygon budgets. Exceeding the limit usually results in point deductions.
+
+Default limit: **10,000 polygons per mesh**
+
+#### How It Works
+
+1. For each mesh in the selection, get the polygon count using MFnMesh.numPolygons
+2. Compare against the configured limit (default: 10,000)
+3. Flag entire meshes that exceed the limit
+
+#### Configuration
+
+To change the polygon limit, edit `modelChecker_commands.py`:
+
+```python
+# Find this line near the polyCountLimit function:
+POLY_COUNT_LIMIT = 10000  # Change this value
+
+# Common academic limits:
+# Game character: 5000 - 15000
+# Game prop: 500 - 5000
+# Environment asset: 10000 - 50000
+```
+
+#### Known Limitations
+
+| Limitation | Impact | Workaround |
+|------------|--------|------------|
+| Per-mesh limit only | Doesn't check total scene polygon count | Manually sum poly counts if needed |
+| No UI configuration | Must edit code to change limit | Edit POLY_COUNT_LIMIT in commands file |
+| Instances counted separately | Each instance counts toward limit | Expected Maya behavior |
+| Subdivision not included | Preview subdivision levels not counted | Check at base mesh level |
+
+#### When This Check Helps
+
+- **Academic submissions**: Most 3D assignments have polygon budgets
+- **Game assets**: Real-time rendering requires optimized meshes
+- **Mobile/VR projects**: Strict performance requirements
+- **Before final submission**: Catch over-detailed models early
+
+#### How to Fix
+
+If a mesh exceeds the polygon limit:
+
+1. **Reduce edge loops**: Delete unnecessary edge loops with Edit Mesh > Delete Edge
+2. **Retopologize**: Use Mesh > Retopologize or manual cleanup
+3. **Simplify details**: Remove geometric details that could be normal maps
+4. **Use LODs**: Create lower-poly versions for distance rendering
+5. **Polygon reduction**: Mesh > Reduce (use with caution)
+
+To check polygon count manually:
+- Select mesh → Display > Heads Up Display > Poly Count
+
+#### Test Cases
+
+| Test | Expected Result |
+|------|-----------------|
+| Low-poly cube (6 faces) | PASS |
+| High-poly sphere (2500+ faces) | FAIL (with limit 1000) |
+| Mesh exactly at limit | PASS (uses > not >=) |
+| Mesh one over limit | FAIL |
+| Empty selection | PASS (graceful handling) |
+| Multiple meshes (mixed) | Only over-limit meshes flagged |
+
+---
+
 ## Adding New Checks
 
 To add a new check to modelChecker:
@@ -236,3 +311,4 @@ To add a new check to modelChecker:
 | 0.1.4 | Original release with 27 checks |
 | 0.2.0 | Academic extension: Added flippedNormals check |
 | 0.2.1 | Academic extension: Added overlappingVertices check |
+| 0.2.2 | Academic extension: Added polyCountLimit check |
