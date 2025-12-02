@@ -1,4 +1,9 @@
+# Python
 *.pyc
-*.egg-info
-build/
+__pycache__/
+
+# macOS
 .DS_Store
+
+# Maya
+*.swatches

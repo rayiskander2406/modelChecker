@@ -1,216 +1,135 @@
-<h1 align="center">mayaLint - Academic Extension</h1>
+# MayaLint
 
-<p align="center">
-  <strong>A Maya plugin for validating 3D models against academic and professional quality standards</strong>
-</p>
+**Check your 3D models for problems before you submit them.**
 
-<p align="center">
-  <a href="#installation">Installation</a> •
-  <a href="#usage">Usage</a> •
-  <a href="#available-checks">Available Checks</a> •
-  <a href="#academic-extension">Academic Extension</a> •
-  <a href="#documentation">Documentation</a>
-</p>
+MayaLint finds common issues in your Maya models - like flipped normals, overlapping vertices, and missing UVs - so you can fix them before your teacher or client sees them.
 
 ---
 
-## About This Project
-
-This is an **Academic Extension** of the original [modelChecker](https://github.com/JakobJK/modelChecker) plugin by Jakob Kousholt, specifically enhanced for digital design students to self-evaluate their 3D models before submission.
-
-The extension adds new quality checks commonly required in academic evaluations, such as flipped normals detection, overlapping vertices, and more.
-
-### Credits
-
-This project is built upon the excellent work of:
-
-- **[Jakob Kousholt](https://www.linkedin.com/in/jakobjk/)** - Original Author, Software Engineer
-- **[Niels Peter Kaagaard](https://www.linkedin.com/in/niels-peter-kaagaard-146b8a13)** - Original Author, Senior Modeler at Weta Digital
-
-Original repository: [github.com/JakobJK/modelChecker](https://github.com/JakobJK/modelChecker)
-
----
-
-## Installation
+## Installation (5 minutes)
 
 ### Step 1: Download
 
-Download this repository:
-- Click the green **"Code"** button above
-- Select **"Download ZIP"**
-- Extract the ZIP file
+Click the green **Code** button above, then click **Download ZIP**.
 
-### Step 2: Locate Your Maya Scripts Folder
+![Download ZIP](https://img.shields.io/badge/1-Download%20ZIP-green?style=for-the-badge)
 
-Find your Maya scripts directory based on your operating system:
+### Step 2: Unzip
 
-**macOS:**
-```
-/Users/<YourUsername>/Library/Preferences/Autodesk/maya/scripts/
-```
-> **Tip:** The Library folder is hidden by default. In Finder, press `Cmd + Shift + G` and paste the path above (replace `<YourUsername>` with your actual username).
+Find the downloaded file (usually in your Downloads folder) and unzip it.
+
+You should see a folder called `modelChecker-main` with a `mayaLint` folder inside.
+
+### Step 3: Find your Maya scripts folder
+
+**Mac:**
+1. Open Finder
+2. Press `Cmd + Shift + G`
+3. Paste this path: `~/Library/Preferences/Autodesk/maya/scripts`
+4. Press Enter
 
 **Windows:**
-```
-C:\Users\<YourUsername>\Documents\maya\scripts\
-```
+1. Open File Explorer
+2. Go to: `Documents > maya > scripts`
 
-**Linux:**
-```
-~/maya/scripts/
-```
+### Step 4: Copy the mayaLint folder
 
-### Step 3: Copy Files
+Copy the `mayaLint` folder (the one with the Python files inside) into your Maya scripts folder.
 
-Copy the `mayaLint` folder (the one containing `mayaLint_UI.py`) into your Maya scripts directory.
-
-Your folder structure should look like:
+Your scripts folder should now look like this:
 ```
-maya/
-└── scripts/
-    └── mayaLint/
-        ├── mayaLint_UI.py
-        ├── mayaLint_commands.py
-        ├── mayaLint_list.py
-        └── ...
+scripts/
+  mayaLint/
+    mayaLint_UI.py
+    mayaLint_commands.py
+    mayaLint_list.py
+    __init__.py
+    __version__.py
 ```
 
-### Step 4: Create a Shelf Button in Maya
+### Step 5: Restart Maya
 
-1. **Open Maya**
-
-2. **Open the Script Editor**
-   - Go to `Windows` → `General Editors` → `Script Editor`
-
-3. **Create the script**
-   - Click on the **Python** tab
-   - Paste the following code:
-
-   ```python
-   from mayaLint import mayaLint_UI
-   mayaLint_UI.UI.show_UI()
-   ```
-
-4. **Create a shelf button**
-   - Select all the code you just pasted
-   - Go to `File` → `Save Script to Shelf...`
-   - Enter a name (e.g., "MayaLint")
-   - Click OK
-
-5. **Done!** You now have a shelf button to launch mayaLint.
-
-### Troubleshooting
-
-**"No module named mayaLint" error:**
-- Make sure the `mayaLint` folder is directly inside the `scripts` folder
-- Make sure you copied the inner `mayaLint` folder, not the outer repository folder
-- Restart Maya after installing
-
-**Plugin doesn't appear:**
-- Check that all `.py` files are present in the mayaLint folder
-- Verify you're using a compatible Maya version (2022+)
+Close Maya completely and reopen it.
 
 ---
 
-## Usage
+## How to Use
 
-### Running Checks
+### First time setup (create a button)
 
-There are three ways to run the checks:
+1. In Maya, go to **Windows > General Editors > Script Editor**
+2. Click the **Python** tab at the bottom
+3. Paste this code:
 
-1. **Selection Mode** - Select objects in Object Mode, then run checks on selection only
-2. **Hierarchy Mode** - Enter a root node name in the UI to check an entire hierarchy
-3. **Scene Mode** - Leave selection empty and root node blank to check the entire scene
+```python
+from mayaLint import mayaLint_UI
+mayaLint_UI.UI.show_UI()
+```
 
-### Understanding Results
+4. Select all the code you just pasted
+5. Go to **File > Save Script to Shelf**
+6. Name it "MayaLint" and click OK
 
-- **Green checkmark** - Check passed, no issues found
-- **Red X with count** - Issues found, click to see details
-- **Select Errors** - Click to select the problematic components in Maya
+Now you have a button on your shelf!
 
-### Best Practices for Students
+### Running checks
 
-1. Run checks **before** submitting your project
-2. Fix **Flipped Normals** and **Overlapping Vertices** first - these cause render issues
-3. Review the error list and understand why each issue matters
-4. Some checks (like Triangles) may be acceptable depending on your assignment
-
----
-
-## Available Checks
-
-### Original Checks (27)
-
-| Category | Checks |
-|----------|--------|
-| **Naming** | Trailing Numbers, Duplicated Names, Shape Names, Namespaces |
-| **General** | Layers, History, Shaders, Unfrozen Transforms, Uncentered Pivots, Parent Geometry, Empty Groups |
-| **Topology** | Triangles, Ngons, Open Edges, Poles, Hard Edges, Lamina, Zero Area Faces, Zero Length Edges, Non-Manifold Edges, Starlike |
-| **UVs** | Self Penetrating UVs, Missing UVs, UV Range, Cross Border, On Border |
-
-### Academic Extension Checks (New)
-
-| Check | Category | Description |
-|-------|----------|-------------|
-| **Flipped Normals** | Topology | Detects faces pointing inward that render black or cause lighting issues |
-| **Overlapping Vertices** | Topology | Finds vertices at the same position that cause shading artifacts |
-
-*More checks coming soon: Poly Count Limit, Missing Textures, Default Materials, Scene Units, UV Distortion, and more.*
+1. Click your MayaLint button
+2. Select the objects you want to check (or leave empty to check everything)
+3. Click **Run All Checks**
+4. Fix any red issues that appear
 
 ---
 
-## Academic Extension
+## What does it check?
 
-This extension was created to help digital design students validate their work against common academic evaluation criteria.
+MayaLint checks for 42 different problems. The most important ones are:
 
-### Why These Checks Matter
+| Problem | Why it matters |
+|---------|----------------|
+| **Flipped Normals** | Makes faces look black in renders |
+| **Overlapping Vertices** | Causes weird shading |
+| **Missing UVs** | Textures won't work |
+| **Non-Manifold Edges** | Breaks 3D printing and game engines |
+| **Ngons** | Can cause problems with subdivision |
 
-| Issue | Impact on Grade | How to Fix |
-|-------|-----------------|------------|
-| Flipped Normals | Major - causes black faces in renders | Select faces → Mesh Display → Reverse |
-| Overlapping Vertices | Major - causes shading artifacts | Edit Mesh → Merge → Merge Vertices |
-| Missing UVs | Major - textures won't apply | UV → Automatic or Planar Projection |
-| Non-Manifold Edges | Moderate - export/boolean issues | Mesh → Cleanup |
-| Ngons | Varies - can cause subdivision issues | Mesh Tools → Multi-Cut to add edges |
-
-### Recommended Workflow
-
-1. **Model** your object
-2. **Run mayaLint** with all checks enabled
-3. **Fix critical issues** (Flipped Normals, Overlapping Vertices, Non-Manifold)
-4. **Review other warnings** and fix as needed
-5. **Re-run checks** to verify fixes
-6. **Submit** your clean model
+See [CHECKS.md](CHECKS.md) for the full list.
 
 ---
 
-## Documentation
+## Troubleshooting
 
-For detailed documentation on each check, including:
-- How each check works
-- Known limitations
-- How to fix issues in Maya
+### "No module named mayaLint"
 
-See: **[CHECKS.md](./CHECKS.md)**
+The mayaLint folder is in the wrong place. Make sure:
+- It's directly inside the `scripts` folder
+- You copied `mayaLint` (not `modelChecker-main`)
+- Restart Maya after copying
+
+### The window doesn't open
+
+Try running this in the Script Editor to see the error:
+```python
+import mayaLint
+print(mayaLint.__file__)
+```
+
+### Checks are slow
+
+Select fewer objects, or run checks one category at a time.
 
 ---
 
-## Compatibility
+## Credits
 
-- **Maya 2022** and newer (Python 3)
-- **Maya 2020-2021** may work but are untested
-- **Maya 2019** and older (Python 2) are not supported
+MayaLint is based on [modelChecker](https://github.com/JakobJK/modelChecker) by:
+- **Jakob Kousholt** - Software Engineer
+- **Niels Peter Kaagaard** - Senior Modeler, Weta Digital
+
+This version adds 15 additional checks for students.
 
 ---
 
 ## License
 
-This project is licensed under the [MIT License](https://rem.mit-license.org/), same as the original modelChecker.
-
----
-
-## Acknowledgments
-
-Special thanks to **Jakob Kousholt** and **Niels Peter Kaagaard** for creating and open-sourcing the original modelChecker plugin. Their work has helped countless artists validate their 3D models.
-
-If you find this tool useful, consider supporting the original authors on [Gumroad](https://jakejk.gumroad.com/l/htZYj).
+MIT License - free to use, modify, and share.
