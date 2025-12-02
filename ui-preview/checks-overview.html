@@ -686,11 +686,11 @@
                 name: 'Intermediate Objects',
                 category: 'general',
                 phase: 3,
-                status: 'planned',
+                status: 'completed',
                 icon: '🔗',
                 description: 'Detects leftover intermediate/construction objects from modeling operations.',
                 whyMatters: 'Intermediate objects bloat file size and indicate unfinished cleanup.',
-                howItWorks: 'Scans for shape nodes marked as intermediate that should have been deleted.',
+                howItWorks: 'Checks each shape node for intermediateObject attribute set to True.',
                 commonCauses: 'Not deleting history properly, duplicating deformed meshes'
             }
         ];

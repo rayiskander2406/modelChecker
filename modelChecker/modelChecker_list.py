@@ -158,5 +158,9 @@ mcCommandsList = {
     "concaveFaces": {
         'label': 'Concave Faces',
         'category': 'topology',
+    },
+    "intermediateObjects": {
+        'label': 'Intermediate Objects',
+        'category': 'general',
     }
 }

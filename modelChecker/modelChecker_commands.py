@@ -1574,3 +1574,67 @@ def concaveFaces(_, SLMesh):
         selIt.next()
 
     return "polygon", concave
+
+
+def intermediateObjects(transformNodes, _):
+    """Detect intermediate (construction history) objects in the scene.
+
+    This check identifies transform nodes that have intermediate shape nodes.
+    Intermediate objects are created during modeling operations (like deformers,
+    blendshapes, or duplicating skinned meshes) and should typically be deleted
+    when cleaning up a scene. They cause:
+    - Increased file size
+    - Slower scene loading
+    - Confusion in the Outliner
+    - Potential issues with exports
+    - Signs of incomplete scene cleanup
+
+    Algorithm:
+        1. For each transform node, get its shape children
+        2. Check if any shape has the 'intermediateObject' attribute set to True
+        3. Flag transforms that have intermediate shape nodes
+        4. Skip checking the intermediate shapes themselves
+
+    Args:
+        transformNodes: List of transform node UUIDs to check
+        _: MSelectionList (not used for this check)
+
+    Returns:
+        tuple: ("nodes", list) where list contains UUIDs of transform
+               nodes that have intermediate shape children
+
+    Known Limitations:
+        - Some intermediate objects are intentional (blendshape targets, etc.)
+        - Referenced intermediate objects may be required by the source file
+        - Deformer setups may legitimately need intermediate objects
+        - Does not distinguish between needed and unneeded intermediates
+
+    Academic Use:
+        Students often forget to delete construction history properly,
+        leaving intermediate objects in their scenes. This check helps
+        identify these leftover objects that bloat file size and indicate
+        incomplete scene cleanup - a common issue in student submissions.
+    """
+    nodesWithIntermediates = []
+
+    for node in transformNodes:
+        nodeName = _getNodeName(node)
+        if not nodeName:
+            continue
+
+        try:
+            # Get all shape children of this transform
+            shapes = cmds.listRelatives(nodeName, shapes=True, fullPath=True) or []
+
+            for shape in shapes:
+                # Check if this shape is marked as intermediate
+                if cmds.attributeQuery('intermediateObject', node=shape, exists=True):
+                    isIntermediate = cmds.getAttr(shape + '.intermediateObject')
+                    if isIntermediate:
+                        nodesWithIntermediates.append(node)
+                        break  # Only need to flag once per transform
+
+        except Exception:
+            pass  # Skip nodes that fail to query
+
+    return "nodes", nodesWithIntermediates

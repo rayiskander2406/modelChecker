@@ -1192,6 +1192,96 @@ cmds.polyTriangulate()
 
 ---
 
+### Intermediate Objects
+
+**Category:** General
+**Function:** `intermediateObjects`
+**Returns:** Nodes (transforms with intermediate shape children)
+
+#### Description
+
+Detects transform nodes that have intermediate shape nodes. Intermediate objects
+are created during modeling operations (like deformers, blendshapes, or
+duplicating skinned meshes) and should typically be deleted when cleaning up
+a scene.
+
+Intermediate objects cause:
+- Increased file size
+- Slower scene loading
+- Confusion in the Outliner
+- Potential issues with exports
+- Signs of incomplete scene cleanup
+
+#### How It Works
+
+1. For each transform node, get its shape children
+2. Check if any shape has the `intermediateObject` attribute set to True
+3. Flag transforms that have intermediate shape nodes
+4. Only flag once per transform even if multiple intermediates exist
+
+#### What Creates Intermediate Objects
+
+| Operation | Creates Intermediate? |
+|-----------|----------------------|
+| Lattice deformer | Yes |
+| Blendshape | Yes (base mesh) |
+| Skin cluster | Yes |
+| Wire deformer | Yes |
+| Duplicating deformed mesh | Sometimes |
+| Delete history | Removes them |
+
+#### Known Limitations
+
+| Limitation | Impact | Workaround |
+|------------|--------|------------|
+| Intentional intermediates | Blendshape targets flagged | Review before deleting |
+| Referenced objects | Cannot delete without breaking ref | Check reference origin |
+| Deformer setups | May be legitimately needed | Verify deformer status |
+| No distinction | Can't tell needed vs unneeded | Manual review required |
+
+#### When This Check Helps
+
+- Final cleanup before submission
+- Reducing file size
+- Preparing for export to game engines
+- Identifying scenes with incomplete history deletion
+- Teaching proper cleanup practices
+
+#### How to Fix
+
+In Maya, delete history to remove intermediate objects:
+1. Select the flagged object
+2. Go to `Edit > Delete by Type > History`
+3. Or press `Alt+Shift+D`
+
+**Warning:** This breaks deformers! Only delete history on static meshes.
+
+For scenes with deformers that need cleanup:
+```python
+import maya.cmds as cmds
+# List all intermediate shapes
+intermediates = cmds.ls(type='mesh', intermediateObjects=True)
+print("Intermediate shapes:", intermediates)
+
+# To delete (CAREFUL - may break deformers):
+# for shape in intermediates:
+#     cmds.delete(shape)
+```
+
+#### Test Cases
+
+| Test | Expected Result |
+|------|-----------------|
+| Clean mesh (no intermediate) | PASS |
+| Mesh with intermediate shape | FAIL (flagged) |
+| Mesh with lattice deformer | FAIL (flagged) |
+| Mesh after delete history | PASS |
+| Blendshape setup | FAIL (flagged) |
+| Multiple intermediates | All flagged |
+| Empty selection | PASS (no crash) |
+
+---
+
 ## Adding New Checks
 
 To add a new check to modelChecker:
