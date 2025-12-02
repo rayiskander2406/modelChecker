@@ -130,5 +130,9 @@ mcCommandsList = {
     "uvDistortion": {
         'label': 'UV Distortion',
         'category': 'UVs',
+    },
+    "texelDensity": {
+        'label': 'Texel Density',
+        'category': 'UVs',
     }
 }

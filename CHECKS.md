@@ -579,6 +579,99 @@ Quick workflow:
 
 ---
 
+### Texel Density
+
+**Category:** UVs
+**Function:** `texelDensity`
+**Returns:** Polygon faces with inconsistent texel density
+
+#### Description
+
+Detects faces with inconsistent texel density across the model. Texel density measures how many texture pixels cover each unit of 3D surface area. Consistent texel density ensures:
+- Uniform texture quality across the entire model
+- No areas appear blurrier or sharper than others
+- Professional-quality UV mapping
+- Predictable texture resolution in renders
+
+Inconsistent texel density is one of the most visible signs of amateur UV work.
+
+#### How It Works
+
+1. For each polygon, calculate 3D world-space area using `MItMeshPolygon.getArea()`
+2. Calculate UV-space area using the shoelace formula
+3. Convert UV area to pixel area: `UV_area * texture_size²`
+4. Compute texel density: `pixel_area / 3D_area` (pixels per world unit)
+5. Calculate median density across all faces on the mesh
+6. Flag faces where density deviates more than threshold from median
+
+The algorithm measures density consistency, not absolute values. This means it works regardless of the actual texture resolution or overall UV scale.
+
+#### Configuration
+
+To adjust sensitivity, edit these constants in `modelChecker_commands.py`:
+
+```python
+TEXEL_DENSITY_THRESHOLD = 0.5        # Min ratio (below = too low density)
+TEXEL_DENSITY_THRESHOLD_MAX = 2.0    # Max ratio (above = too high density)
+TEXEL_DENSITY_TEXTURE_SIZE = 1024    # Assumed texture resolution
+```
+
+- Lower min threshold = more tolerant of low-density areas
+- Higher max threshold = more tolerant of high-density areas
+- Texture size affects absolute numbers but not relative comparison
+
+#### Known Limitations
+
+| Limitation | Impact | Workaround |
+|------------|--------|------------|
+| Requires UVs | Faces without UVs are skipped | Use Missing UVs check first |
+| Uniform texture size | Doesn't account for multi-res textures | Manual review for mixed resolutions |
+| Assumed size | Uses configured size, not actual textures | Adjust TEXEL_DENSITY_TEXTURE_SIZE |
+| Small faces | May have unstable calculations | Review flagged small faces manually |
+| Intentional variation | May flag hero/detail areas | Review and adjust threshold |
+
+#### When This Check Helps
+
+- **UV planning**: Verify density before finalizing UVs
+- **Texture baking**: Ensure uniform density for lightmap baking
+- **Game assets**: Maintain consistent visual quality
+- **Assignment submission**: Demonstrate professional UV skills
+- **After UV operations**: Verify density after scaling UV islands
+
+#### How to Fix
+
+In Maya:
+1. Select the flagged polygon faces
+2. Open **UV Editor** (Windows > UV Editor)
+3. Check the UV shell scale relative to other shells
+4. Use **UV > Transform > Scale** to match density with surrounding areas
+5. Use **Texel Density** tools in UV Toolkit if available
+
+Professional workflow:
+1. Calculate your target texel density (e.g., 512 pixels per meter)
+2. Set up a checker texture to visualize density
+3. Scale UV shells to achieve consistent checker pattern size
+4. Use UV > Unfold after scaling to maintain shape
+
+Quick fix:
+1. Select all UVs
+2. Use **UV > Layout** with "Scale mode: Uniform"
+3. This scales all islands to similar density
+
+#### Test Cases
+
+| Test | Expected Result |
+|------|-----------------|
+| Uniform cube with auto UVs | PASS |
+| Uniform plane with auto UVs | PASS |
+| Plane with some UVs scaled 4x | FAIL (flags scaled faces) |
+| Mesh without UVs | PASS (skipped, no UVs) |
+| Sphere (pole variation) | May flag pole faces (expected) |
+| Extreme UV scaling (0.1x) | FAIL (flags all scaled faces) |
+| Configurable threshold | Tighter threshold catches more |
+
+---
+
 ## Adding New Checks
 
 To add a new check to modelChecker:

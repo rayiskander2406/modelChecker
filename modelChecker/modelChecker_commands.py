@@ -927,3 +927,123 @@ def _calculateUVPolygonArea(uCoords, vCoords):
         area -= uCoords[j] * vCoords[i]
 
     return abs(area) / 2.0
+
+
+# Texel density threshold - how much deviation from median is acceptable
+# Default: 0.5 means faces with <50% or >200% of median texel density are flagged
+TEXEL_DENSITY_THRESHOLD = 0.5  # Min ratio (below = too low density)
+TEXEL_DENSITY_THRESHOLD_MAX = 2.0  # Max ratio (above = too high density)
+
+# Assumed texture resolution for texel density calculation (pixels)
+# This is used when no texture is connected - common default texture size
+TEXEL_DENSITY_TEXTURE_SIZE = 1024
+
+
+def texelDensity(_, SLMesh):
+    """Detect faces with inconsistent texel density across the mesh.
+
+    Texel density measures how many texture pixels cover each unit of 3D
+    surface area. Consistent texel density ensures uniform texture quality
+    across the entire model - no areas appear blurrier or sharper than others.
+
+    This check identifies faces where texel density deviates significantly
+    from the mesh's median, indicating:
+    - Some parts will appear blurry (low density)
+    - Some parts will appear overly sharp (high density)
+    - Visible seams where density changes abruptly
+    - Wasted texture resolution or insufficient detail
+
+    Algorithm:
+        1. For each polygon, calculate its 3D world-space area
+        2. Calculate the corresponding UV-space area
+        3. Convert UV area to pixel area: UV_area * texture_size^2
+        4. Compute texel density: pixel_area / 3D_area (pixels per unit)
+        5. Compare each face's density against the median density
+        6. Flag faces where density ratio is outside threshold bounds
+
+    Args:
+        _: Not used
+        SLMesh: MSelectionList containing mesh shapes to check
+
+    Returns:
+        tuple: ("polygon", dict) where dict maps UUID -> list of
+               polygon indices with inconsistent texel density
+
+    Configuration:
+        TEXEL_DENSITY_THRESHOLD (default 0.5): Min ratio threshold
+        TEXEL_DENSITY_THRESHOLD_MAX (default 2.0): Max ratio threshold
+        TEXEL_DENSITY_TEXTURE_SIZE (default 1024): Assumed texture size
+
+    Known Limitations:
+        - Requires UVs to exist (faces without UVs are skipped)
+        - Assumes uniform texture size; multi-resolution not supported
+        - Uses assumed texture size, not actual connected textures
+        - Very small faces may have unstable density calculations
+        - Intentional density variation (detail areas) may be flagged
+
+    Academic Use:
+        Consistent texel density is a hallmark of professional UV work.
+        Inconsistent density is immediately visible in renders and shows
+        that proper UV planning was not done. This is frequently checked
+        in portfolio reviews and assignment grading.
+    """
+    import math
+
+    densityErrors = defaultdict(list)
+
+    selIt = om.MItSelectionList(SLMesh)
+    while not selIt.isDone():
+        dagPath = selIt.getDagPath()
+        mesh = om.MFnMesh(dagPath)
+        fn = om.MFnDependencyNode(dagPath.node())
+        uuid = fn.uuid().asString()
+
+        # Calculate texel density for each face
+        densities = []
+        faceIt = om.MItMeshPolygon(dagPath)
+        while not faceIt.isDone():
+            if faceIt.hasUVs():
+                # Get 3D area
+                area3D = faceIt.getArea()
+
+                # Get UV area
+                try:
+                    uvs = faceIt.getUVs()
+                    uvArea = _calculateUVPolygonArea(uvs[0], uvs[1])
+
+                    # Convert UV area to pixel area (UV 0-1 space to texture pixels)
+                    pixelArea = uvArea * (TEXEL_DENSITY_TEXTURE_SIZE ** 2)
+
+                    # Calculate texel density (pixels per world unit squared)
+                    if area3D > 0.0001:
+                        texelDensityValue = pixelArea / area3D
+                        if texelDensityValue > 0:
+                            densities.append((faceIt.index(), texelDensityValue))
+                except:
+                    pass  # Skip faces with UV errors
+
+            faceIt.next()
+
+        # Need enough samples to calculate meaningful median
+        if len(densities) < 2:
+            selIt.next()
+            continue
+
+        # Calculate median texel density for this mesh
+        sortedDensities = sorted([d[1] for d in densities])
+        medianDensity = sortedDensities[len(sortedDensities) // 2]
+
+        if medianDensity < 0.0001:
+            selIt.next()
+            continue
+
+        # Flag faces that deviate significantly from median
+        for faceIdx, density in densities:
+            ratio = density / medianDensity
+
+            if ratio < TEXEL_DENSITY_THRESHOLD or ratio > TEXEL_DENSITY_THRESHOLD_MAX:
+                densityErrors[uuid].append(faceIdx)
+
+        selIt.next()
+
+    return "polygon", densityErrors

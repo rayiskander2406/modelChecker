@@ -600,11 +600,11 @@
                 name: 'Texel Density',
                 category: 'UVs',
                 phase: 2,
-                status: 'planned',
+                status: 'completed',
                 icon: '🎯',
                 description: 'Checks that UV shells have consistent pixel density across the model for uniform texture detail.',
                 whyMatters: 'Inconsistent texel density makes some parts look sharp while others look blurry.',
-                howItWorks: 'Measures pixels-per-unit ratio across UV shells and flags outliers.',
+                howItWorks: 'Calculates pixels-per-unit ratio for each face, compares against median, flags outliers beyond threshold.',
                 commonCauses: 'Mixing different UV scales, not checking texel density after unwrap'
             },
             {
