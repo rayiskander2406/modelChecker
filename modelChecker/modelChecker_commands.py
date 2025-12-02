@@ -378,11 +378,17 @@ def flippedNormals(_, SLMesh):
     and problems with lighting calculations.
 
     Algorithm:
-        1. Calculate mesh bounding box center as reference point
-        2. For each face, get its center and normal in world space
+        1. Calculate mesh bounding box center as reference point (object space)
+        2. For each face, get its center and normal in object space
         3. Calculate vector from mesh center to face center
         4. If dot product of normal and this vector is negative,
            the normal points inward (flipped)
+
+    Note:
+        All calculations are performed in object space to ensure correct
+        results regardless of the mesh's transform (translation, rotation,
+        scale). This means the check works correctly even if the mesh is
+        not at the world origin or has unfrozen transforms.
 
     Args:
         _: Unused parameter (node list, maintained for API consistency)
@@ -420,9 +426,9 @@ def flippedNormals(_, SLMesh):
 
         faceIt = om.MItMeshPolygon(dagPath)
         while not faceIt.isDone():
-            # Get face center and normal in world space
-            faceCenter = faceIt.center(om.MSpace.kWorld)
-            faceNormal = faceIt.getNormal(om.MSpace.kWorld)
+            # Get face center and normal in OBJECT space (matches bounding box space)
+            faceCenter = faceIt.center(om.MSpace.kObject)
+            faceNormal = faceIt.getNormal(om.MSpace.kObject)
 
             # Vector from mesh center to face center
             toFace = om.MVector(

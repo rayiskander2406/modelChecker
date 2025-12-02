@@ -89,10 +89,12 @@ Detects faces with normals pointing inward (reversed/flipped normals). Flipped n
 
 #### How It Works
 
-1. Calculates mesh bounding box center as reference point
-2. For each face, gets its center and normal in world space
+1. Calculates mesh bounding box center as reference point (object space)
+2. For each face, gets its center and normal in object space
 3. Calculates vector from mesh center to face center
 4. If dot product of normal and this vector is negative, the normal points inward
+
+All calculations are performed in object space, ensuring correct results regardless of the mesh's transform (translation, rotation, scale).
 
 #### Known Limitations
 
@@ -100,7 +102,6 @@ Detects faces with normals pointing inward (reversed/flipped normals). Flipped n
 |------------|--------|------------|
 | Uses bounding box center | May give false positives on highly concave meshes | Review flagged faces manually |
 | Designed for convex/mostly-convex geometry | Complex concave shapes may have legitimate inward-facing areas | Use Maya's Mesh Display > Face Normals for verification |
-| World space calculation | Mesh must be properly positioned | Ensure transforms are frozen before checking |
 
 #### When This Check Helps
 
@@ -125,10 +126,14 @@ In Maya:
 
 | Test | Expected Result |
 |------|-----------------|
-| Clean cube | PASS (0 flipped faces) |
+| Clean cube at origin | PASS (0 flipped faces) |
 | Cube with all normals reversed | FAIL (6 flipped faces) |
 | Sphere with some reversed faces | FAIL (reports specific faces) |
 | Empty selection | PASS (graceful handling) |
+| Translated cube (clean normals) | PASS (0 flipped faces) |
+| Rotated cube (clean normals) | PASS (0 flipped faces) |
+| Scaled cube (clean normals) | PASS (0 flipped faces) |
+| Combined transforms (clean normals) | PASS (0 flipped faces) |
 
 ---
 
