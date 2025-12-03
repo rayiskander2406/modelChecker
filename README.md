@@ -63,6 +63,44 @@ Close Maya completely and reopen it.
 
 ---
 
+## Verify Your Installation (Optional)
+
+Want to make sure everything is working? Run our validation script to test all 42 checks.
+
+### How to run the validation:
+
+1. In Maya, go to **Windows > General Editors > Script Editor**
+2. Click the **Python** tab
+3. Copy the entire contents of [`scripts/validate_installation.py`](scripts/validate_installation.py)
+4. Paste it into the Script Editor
+5. Press **Ctrl+Enter** (or click Execute All)
+
+### What it does:
+
+- Creates test geometry with deliberate defects (flipped normals, missing UVs, etc.)
+- Runs all 42 checks against the test geometry
+- Reports PASS/FAIL for each check
+- Cleans up after itself
+
+### Expected output:
+
+```
+============================================================
+VALIDATION SUMMARY
+============================================================
+Total checks tested: 42
+  Passed:  42
+  Failed:  0
+Duration: ~30 seconds
+============================================================
+SUCCESS! All 42 checks validated - mayaLint is ready to use!
+============================================================
+```
+
+If any checks fail, the script will tell you which ones and provide troubleshooting hints.
+
+---
+
 ## How to Use
 
 ### First time setup (create a button)
